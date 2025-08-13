@@ -6,35 +6,53 @@ import Column from 'primevue/column'
 const formData = ref({
   username: '',
   password: '',
+  confirmPassword: '',
   isAustralian: false,
   reason: '',
   gender: ''
 })
-
+const validateConfirmPassword = (blur) => {
+  if (formData.value.password !== formData.value.confirmPassword) {
+    if (blur) errors.value.confirmPassword = 'Passwords do not match.'
+  } else {
+    errors.value.confirmPassword = null
+  }
+}
 const submittedCards = ref([])
 
 const submitForm = () => {
   validateName(true)
   validatePassword(true)
+  validateConfirmPassword(true)
   if (!errors.value.username && !errors.value.password) {
     submittedCards.value.push({ ...formData.value })
     clearForm()
   }
+}
+const friendHint = ref(null)
+
+const checkReason = () => {
+  friendHint.value =
+    /friend/i.test(formData.value.reason) ? 'Great to have a friend!' : null
 }
 
 const clearForm = () => {
   formData.value = {
     username: '',
     password: '',
+    confirmPassword: '',
     isAustralian: false,
     reason: '',
     gender: ''
   }
+  friendHint.value = null
+  Object.keys(errors.value).forEach(k => (errors.value[k] = null))
 }
 
 const errors = ref({
   username: null,
   password: null,
+  confirmPassword: null,
   resident: null,
   gender: null,
   reason: null
@@ -86,39 +104,33 @@ const validatePassword = (blur) => {
           <div class="row mb-3">
             <div class="col-md-6 col-sm-6">
               <label for="username" class="form-label">Username</label>
-              <input
-                type="text"
-                class="form-control"
-                id="username"
-                @blur="() => validateName(true)"
-                @input="() => validateName(false)"
-                v-model="formData.username"
-              />
+              <input type="text" class="form-control" id="username" @blur="() => validateName(true)"
+                @input="() => validateName(false)" v-model="formData.username" />
               <div v-if="errors.username" class="text-danger">{{ errors.username }}</div>
             </div>
 
             <div class="col-md-6 col-sm-6">
               <label for="password" class="form-label">Password</label>
-              <input
-                type="password"
-                class="form-control"
-                id="password"
-                @blur="() => validatePassword(true)"
-                @input="() => validatePassword(false)"
-                v-model="formData.password"
-              />
+              <input type="password" class="form-control" id="password" @blur="() => validatePassword(true)"
+                @input="() => validatePassword(false)" v-model="formData.password" />
               <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
             </div>
+
+            <!-- Confirm Password 新增 -->
+            <div class="col-md-6 col-sm-6">
+              <label for="confirm-password" class="form-label">Confirm password</label>
+              <input type="password" class="form-control" id="confirm-password" v-model="formData.confirmPassword"
+                @blur="() => validateConfirmPassword(true)" />
+              <div v-if="errors.confirmPassword" class="text-danger">
+                {{ errors.confirmPassword }}
+              </div>
+            </div>
           </div>
+
           <div class="row mb-3">
             <div class="col-md-6 col-sm-6">
               <div class="form-check">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="isAustralian"
-                  v-model="formData.isAustralian"
-                />
+                <input type="checkbox" class="form-check-input" id="isAustralian" v-model="formData.isAustralian" />
                 <label class="form-check-label" for="isAustralian">Australian Resident?</label>
               </div>
             </div>
@@ -133,12 +145,11 @@ const validatePassword = (blur) => {
           </div>
           <div class="mb-3">
             <label for="reason" class="form-label">Reason for joining</label>
-            <textarea
-              class="form-control"
-              id="reason"
-              rows="3"
-              v-model="formData.reason"
-            ></textarea>
+            <textarea class="form-control" id="reason" rows="3" v-model="formData.reason"
+              @input="checkReason"></textarea>
+            <div v-if="friendHint" class="text-success small">
+              {{ friendHint }}
+            </div>
           </div>
           <div class="text-center">
             <button type="submit" class="btn btn-primary me-2">Submit</button>
@@ -162,12 +173,7 @@ const validatePassword = (blur) => {
 
   <div class="row mt-5" v-if="submittedCards.length">
     <div class="d-flex flex-wrap justify-content-start">
-      <div
-        v-for="(card, index) in submittedCards"
-        :key="index"
-        class="card m-2"
-        style="width: 18rem"
-      >
+      <div v-for="(card, index) in submittedCards" :key="index" class="card m-2" style="width: 18rem">
         <div class="card-header">User Information</div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item">Username: {{ card.username }}</li>
@@ -208,12 +214,14 @@ const validatePassword = (blur) => {
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .card-header {
   background-color: #275fda;
   color: white;
   padding: 10px;
   border-radius: 10px 10px 0 0;
 }
+
 .list-group-item {
   padding: 10px;
 }

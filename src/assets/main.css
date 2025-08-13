@@ -14,6 +14,14 @@ a,
   transition: 0.4s;
   padding: 3px;
 }
+/* src/assets/main.css */
+.container.my-lib {        /* 更具体，避免和 Bootstrap 冲突 */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 80vw;
+  margin: 0 auto;
+  padding: 20px;
+}
+
 
 @media (hover: hover) {
   a:hover {
